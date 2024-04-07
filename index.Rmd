@@ -1,0 +1,1667 @@
+---
+title: "Unveiling the Black Box"
+subtitle: "Researching Algorithms with Audit Studies"
+author: "<b>Fabio Votta</b> <i>(University of Amsterdam)</i>"
+date: '&nbsp;`r icons::icon_style(icons::fontawesome("link"),fill="black")`&nbsp;favstats.github.io/nefca2023 (Slides) <br> &nbsp;`r icons::icon_style(icons::fontawesome("twitter"),fill="blue")`&nbsp;favstats <br> &nbsp;`r icons::icon_style(icons::fontawesome("mastodon"),fill="#615ff7")`&nbsp;favstats@fosstodon.org <br> &nbsp;`r icons::icon_style(icons::fontawesome("square", style = "solid"),fill="#0085ff")`&nbsp;favstats &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; April 8 2024 - AlgoSoc YSN Spring School'
+output:
+  xaringan::moon_reader:
+    css: [ascor.css, default]
+    lib_dir: libs
+    nature:
+      titleSlideClass: [bottom, left]
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false       
+      slideNumberFormat: "%current%"  
+      ratio: "16:9"
+---
+
+layout: true
+    
+<div class="logo"></div> 
+
+
+
+```{r setup, include=FALSE}
+# Here you can place global options for the entire document.
+# Mostly used for knitr settings, but can also load data etc.
+# Whatever happens here will not show in the presentation.
+knitr::opts_chunk$set(fig.retina = 3, 
+                      warning = FALSE, 
+                      message = FALSE,
+                      echo = F)
+
+
+library(tidyverse)
+
+source("../../phd/codebase/algo_ads/helpers.R")
+
+overview <- readRDS("../../phd/codebase/algo_ads/data/overview.rds")
+
+overview_day <- readRDS("../../phd/codebase/algo_ads/data/overview_day.rds")
+
+# dir("../img", recursive = T, full.names = T) %>%
+#   walk(~{file.copy(.x, str_remove(.x, "\\.\\.\\/"))})
+
+```
+
+
+
+---
+
+
+class: white
+
+## What is an algorithm audit study?
+
+<center>
+
+.font150["an <b>.gold[empirical study]</b> investigating a <b>.darkblue[public]</b> <b>.orange[algorithmic system]</b> for potential <b>.purple[problematic behavior]</b>"  (Bandy 2021)] 
+
+</center>
+
+--
+
++ <b>.gold[empirical study]</b>
+
+  + includes an experiment or analysis (quantitative or qualitative)
+  
+--
+  
++ <b>.darkblue[public]</b> (optional?)
+
+  + used in a commercial context or other public setting such as law enforcement, education, criminal justice, or public transportation
+
+--
+
++ <b>.orange[algorithmic system]</b>
+
+  + socio-technical system influenced by at least one algorithm
+  
+--
+  
++ <b>.purple[problematic behavior]</b>
+
+  + discrimination, distortion, exploitation, or misjudgement. 
+  + A behavior is problematic when it *causes harm* (or potential harm)
+
+---
+
+class: white
+
+## Four .fancy[Types] of Problematic Behavior .font50[(Bandy 2021)]
+
+.pull-left[
+
+**1. Discrimination**
+
+disparate treatment based on race, age, gender, location, socio-economic status, or intersecting identities 
+  
+> Example: showing high-paying job ads primarily to men; facial recognition systems performing poorly on minority groups
+  
+]
+
+
+
+---
+
+class: white
+
+## Four .fancy[Types] of Problematic Behavior
+
+.pull-left[
+
+**1. Discrimination**
+
+disparate treatment based on race, age, gender, location, socio-economic status, or intersecting identities 
+  
+> Example: showing high-paying job ads primarily to men; facial recognition systems performing poorly on minority groups
+  
+**2. Distortion**
+
+Outcomes distort or obscure reality
+
+> Example: Search engines reinforcing stereotypes; filter bubbles
+
+]
+
+--
+
+.pull-right[
+
+**3. Exploitation**
+
+Inappropriate use of (sensitive) personal information
+  
+> Example: Inferring sensitive personal information without consent	
+  
+
+]
+
+
+---
+
+class: white
+
+## Four .fancy[Types] of Problematic Behavior
+
+.pull-left[
+
+**1. Discrimination**
+
+disparate treatment based on race, age, gender, location, socio-economic status, or intersecting identities 
+  
+> Example: showing high-paying job ads primarily to men; facial recognition systems performing poorly on minority groups
+  
+**2. Distortion**
+
+Outcomes distort or obscure reality
+
+> Example: Search engines reinforcing stereotypes; filter bubbles
+
+]
+
+
+.pull-right[
+
+**3. Exploitation**
+
+Inappropriate use of (sensitive) personal information
+  
+> Example: Inferring sensitive personal information without consent	
+  
+  
+**4. Misjudgment**
+
+The algorithm makes incorrect predictions or classifications.
+
+
+> Example: Algorithms incorrectly categorizing users' employment status or interests; content moderation errors 
+
+]
+
+
+
+
+
+
+---
+
+class: white
+
+## How to conduct an algorithm audit study? .font50[(Bandy 2021; Urman et al. 2024)]
+
+--
+
+.pull-left[
+
++ <b>Code audit</b> 
+
+  + researchers obtain and analyze the code that makes up the algorithm
+  
+  + *rarely available*
+  
+  > Weber & Kosterich 2018: "Investigates code of 59 open source mobile news apps"
+  
+  + "Much of the code that automates news distribution is created separately from the journalism world."
+
+]
+
+.pull-right[
+
+![](img/codecode.jpg)
+
+]
+
+
+---
+
+class: white
+
+## How to conduct an algorithm audit study? .font50[(Bandy 2021; Urman et al. 2024)]
+
+.pull-left[
+
++ Code audit
+
++ <b>direct/non-personalized scraping</b>
+
+  + using APIs / webscraping
+  
+  + *limited usefulness because results are not personalized*
+
+  > *"Foreign beauties want to meet you": The sexualization of women in Google’s organic and sponsored text search results*  Urman & Makhortykh (2023)
+  
+    + "We find evidence of the sexualization of women, particularly those from the Global South and East, in search outputs in both organic and sponsored search results."
+
+]
+
+.pull-right[
+
+![](https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRWp4SHWSUXCi88mAamdLNMpt6tRygt_XRdV5DywbOGtA&s)
+
+]
+
+---
+
+class: white
+
+## How to conduct an algorithm audit study? .font50[(Bandy 2021; Urman et al. 2024)]
+
+.pull-left[
+
++ Code audit
+
++ direct/non-personalized scraping
+
++ <b>Sock puppet/personalized scraping</b>
+
+  + creating accounts/entities that receive personalized recommendations
+  
+  + *carrier puppets/repurposing*: impersonated users affect the real-world system and may "carry" effects onto end users
+  
+  + research has (in-)direct effects on algorithmic system
+  
+  > Hagar & Diakopoulos (2023)
+  
+  + "We find almost no evidence of proactive news exposure on TikTok’s behalf."
+
+]
+
+.pull-right[
+
+![](https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Sock_puppet_and_keyboard.jpg/640px-Sock_puppet_and_keyboard.jpg)
+
+]
+
+
+---
+
+class: white
+
+## How to conduct an algorithm audit study? .font50[(Bandy 2021; Urman et al. 2024)]
+
+.pull-left[
+
++ Code audit
+
++ direct/non-personalized scraping
+
++ Sock puppet/personalized scraping
+
++ <b>Crowdsourcing</b>
+
+  + researchers collect data by hiring end users to test the algorithm
+  
+  >  Glaesener (2022) Exploring Siri’s Content Diversity Using a Crowdsourced Audit. 
+  
+  + "A diverse sample of 170 US-based Siri users between the ages of 18-64 performed five identical queries about politically controversial issues.  Forty-two percent of the participants received the six most frequent answers, while 22% of the users received unique answers."
+
+]
+
+.pull-right[
+
+![](https://sloanreview.mit.edu/wp-content/uploads/2017/05/MAG-Malhotra-Internal-Crowdsourcing-1200-1200x630.jpg)
+
+]
+
+
+
+---
+
+class: white, middle, center
+
+
+# The Role of Algorithms
+
+# in Digital Political Advertising
+
+![](https://media3.giphy.com/media/3o6Yg4GUVgIUg3bf7W/giphy.gif)
+
+
+*studying ad delivery algorithms by "expert"sourcing*
+
+---
+
+### The Role of Algorithms in Digital Political Advertising
+
+
+.pull-left[
+<img src="img/cambridge_analytica.png" width="100%">
+
+
+*The explicit assumption here that advertisers typically have strong control over who sees which ad*
+
+]
+
+--
+
+.pull-right[
+
+**But there is more than *just* targeting criteria that decides who sees political ads:**
+
++ advertisers can set targeting *boundaries*
+
++ *ad delivery algorithms* "decide" which individual users get ads from which advertiser
+
++ they do this by organizing *automated ad auctions* which set prices
+
+]
+
+
+---
+
+### Pricing differences in the US 2020 election
+
++ Biden campaign paid more than **6x more**
+  + compared to Trump campaign when targeting older voters. [(The Markup 2020)](https://themarkup.org/election-2020/2020/10/29/facebook-political-ad-targeting-algorithm-prices-trump-biden)
+
+
+<center>
+```{r, out.width="60%", echo = F}
+knitr::include_graphics("img/older.png")
+```
+</center>
+
+<!-- ![](img/older.png) -->
+
+
+---
+
+class: white
+
+### Prior Research (Ali et al., 2020,2021)
+
+.pull-left[
+![](img/ali1.png)
+]
+
+
+
+.pull-right[
+<img src="img/ali2.png" width="90%">
+]
+
+
+
+---
+
+### Prior Research (Ali et al., 2020,2021)
+
+
+When targeting the same audience, at the same time, with the same budget:
+
++ Ad delivery is heavily skewed along gendered and racial stereotypes
+  + even without the intent of the advertiser [(Ali et al. 2020)](https://dl.acm.org/doi/10.1145/3359301)
+
+--
+
+.pull-left[
+**Delivery remains skewed even with blank image**
+
+Images invisible to humans but still detectable by algorithm:
+
++ yield **similar skews** in delivery
+
++ highlights importance of algorithm
+
++ less based on differences in user behavior/preferences
+]
+
+.pull-right[
+![](img/ali3.png)
+]
+
+
+
+---
+
+### Prior Research (Ali et al., 2020,2021)
+
+
+When targeting the same audience, at the same time, with the same budget:
+
+Regarding political ads [(Ali et al., 2021)](https://dl.acm.org/doi/pdf/10.1145/3437963.3441801):
+
+--
+
+.pull-left[
++ **Skewed delivery**
+
+  + Political ads more often delivered to ideologically congruent audience
+      + Bernie ads → higher % D;
+      + Trump ads → higher % R
+
++ **Increased cost**
+
+  + Liberal ad to a liberal audience: *21 Dollar per 1000 users*;
+  + Conservative ad delivered to liberal audience: *40 Dollar per 1000 users*.
+]
+
+--
+
+.pull-right[
+**Results hold**
+
++ when tricking Facebook into classifying non-partisan ads as partisan
+
+<img src="img/ali4.png" width="40%">
+
+]
+
+---
+
+class: center, middle
+
+## Research Question
+
+### How does the Meta ad delivery algorithm<br>influence the pricing & distribution of political ads<br>in the Netherlands?
+
+---
+
+class: center, middle
+
+# Research Design
+
+---
+
+### Research Design
+
++ Algorithm audit study
+
++ Place the same ads targeting the same audiences (9 different ones)
+
+--
+
++ Collaborate with Dutch parties to place political ads
+
++ Final collaboration with 3:
+
+  1. GroenLinks (Green party)
+  2. VVD (centre-right party of PM Rutte)
+  3. PvdA (social democrats)
+
+
+---
+
+class: center, middle
+
+# Ad Creative and Setup
+
+---
+
+## How the ad looked like on Desktop
+
+<img src="img/example_pvda.png" style="float: left; width: 37%; margin-right: 1%; margin-bottom: 0.5em;">
+<img src="img/example_gl.png" style="float: left; width: 37%; margin-right: 1%; margin-bottom: 0.5em;">
+<p style="clear: both;">
+
+
+---
+
+## How the ad looked like on Desktop
+
+
+<img src="img/example_vvd.png" style="float: left; width: 37%; margin-right: 1%; margin-bottom: 0.5em;">
+
+
+
+
+---
+
+
+class: center, middle
+
+## Results
+
+
+---
+
+class: center, white, middle
+
+### Between-party differences
+
+$\rightarrow$ we consistently find one party that pays less and reaches more people
+
+
+
+---
+
+class: white
+
+#### Between-party differences (per individual ad)
+
+.font80[PvdA pays the least (**10-12 cents less** or: 8-10%) & reaches more people (~**1.1 - 1.3k more** per ad)]
+
+
+.pull-left[
+
+
+
+```{r, echo=F}
+
+share_dat <- overview %>%
+  drop_na(ad_name) %>%
+  # set_names(names(overview_uva)) %>%
+  mutate(pair = readr::parse_number(ad_set_name)) %>%
+  mutate(comparison = case_when(
+    str_detect(ad_name, "Economy") ~ "Economy",
+    str_detect(ad_name, "Environment") ~ "Environment",
+    str_detect(ad_name, "Education") ~ "Education",
+    str_detect(ad_name, "Politics") ~ "Politics",
+    T ~ NA_character_
+  )) %>%
+  drop_na(comparison) %>%
+  # count(ad_name)
+  group_by(pair, comparison, party) %>%
+  mutate(total = sum(reach),
+         share = reach/total*100) %>%
+  ungroup()
+
+overview %>% #filter(is.na(targeting))
+  drop_na(targeting) %>%
+  # filter(targeting == "No Targeting") %>%
+  mutate(party = fct_relevel(party, c("PvdA", "GroenLinks", "VVD"))) %>%
+  ggplot(aes(party, cost_per_1_000_people_reached)) + # Move y and x here so than they can be used in stat_*
+  geom_jitter(width = 0.2) +
+  geom_boxplot(aes(color = party), width = 0.2) +
+  # stat_summary(aes(color = party), fun = mean, fun.min = mean, fun.max = mean,
+  #              geom = "crossbar", width = 0.5) +
+  scale_color_parties() +
+  theme_minimal() +
+  theme(legend.position = "none", plot.title = element_text(size = 19, face = "bold")) +
+  # ggpubr::stat_compare_means() +
+  EnvStats::stat_mean_sd_text(digits = 2) +
+  labs(y = "Cost per 1000 users reached\nin Euros (across all conditions)", x = "Party", title = "Cost per 1000 users per ad\n")
+
+share_dat %>%
+    filter(str_detect(targeting, "Higher")) %>%
+    arrange(-share) %>%
+    select(party, reach, share, targeting, relevance)
+```
+
+
+]
+
+--
+
+.pull-right[
+
+
+```{r, echo=F}
+
+
+
+overview %>%
+  drop_na(targeting) %>%
+  # filter(targeting == "No Targeting") %>%
+  mutate(party = fct_relevel(party, c("PvdA", "GroenLinks", "VVD"))) %>%
+  ggplot(aes(party, reach)) + # Move y and x here so than they can be used in stat_*
+  geom_jitter(width = 0.2) +
+  geom_boxplot(aes(color = party), width = 0.2) +
+  # stat_summary(aes(color = party), fun = mean, fun.min = mean, fun.max = mean,
+  #              geom = "crossbar", width = 0.5) +
+  scale_color_parties() +
+  theme_minimal() +
+  theme(legend.position = "none", plot.title = element_text(size = 19, face = "bold")) +
+  # ggpubr::stat_compare_means() +
+  EnvStats::stat_mean_sd_text(digits = 0) +
+  labs(y = "Reach (across all conditions) per ad", x = "Party", title = "Reach (unique people)\n")
+```
+
+
+
+
+]
+
+
+
+
+---
+
+class: white
+
+#### Between-party differences (per target audience)
+
+--
+
+<!-- ![](img/diffs_single1.png) -->
+
+<img src="img/diffs_single1.png" width="85%" height="85%">
+
+
+---
+
+class: center, white, middle
+
+### Within-party differences
+
+---
+
+
+class: white
+
+
+
+### Within-party differences - Price per 1k
+
+
+.pull-left[
+
+
+Ads **cost less for**:
+
++ *higher-educated* vs. *lower-educated audience*
+
+Ad price **does not statistically differ for**:
+
++ Audience *interested in the economy* vs. *not interested*
+
++ Audience *interested in politics* vs. *not interested*
+
+Ads **cost more for**:
+
++ Audience *interested in the environment* vs. *not interested*
+
+
+]
+
+.pull-right[
+
+![](img/diffs1.png)
+
+]
+
+---
+
+class: white, middle center
+
+**18-24 year olds and women are reached less (and cost more to reach)**
+
+![](img/priceshare.png)
+
+
+---
+
+# Curious to learn more?
+
+I am currently in the process of building on this research by conducting a very similar design during the European Parliament elections
+
+
+
+
+---
+
+class: center, middle
+
+## Thank you for your attention! Questions?
+
+Link to presentation: *favstats.github.io/algosoc-spring24*
+
+.pull-left[
+
+![](https://c.tenor.com/Q9qk5zN5EesAAAAM/space-kitten.gif)
+![](https://c.tenor.com/Q9qk5zN5EesAAAAM/space-kitten.gif)
+
+![](https://c.tenor.com/Q9qk5zN5EesAAAAM/space-kitten.gif)
+![](https://c.tenor.com/Q9qk5zN5EesAAAAM/space-kitten.gif)
+
+
+
+]
+
+.pull-right[
+
+![](https://c.tenor.com/Q9qk5zN5EesAAAAM/space-kitten.gif)
+![](https://c.tenor.com/Q9qk5zN5EesAAAAM/space-kitten.gif)
+
+![](https://c.tenor.com/Q9qk5zN5EesAAAAM/space-kitten.gif)
+![](https://c.tenor.com/Q9qk5zN5EesAAAAM/space-kitten.gif)
+
+
+
+]
+
+
+
+---
+
+## Literature
+
+Weber, M. S., & Kosterich, A. (2018). Coding the News: The role of computer code in filtering and distributing news. Digital Journalism, 6(3), 310–329. https://doi.org/10.1080/21670811.2017.1366865
+
+---
+
+
+
+
+<!-- ### IV. Data Donation  -->
+
+
+<!-- <img src="img/download.jpg" width="60%"> -->
+
+
+
+
+<!-- --- -->
+
+<!-- ### IV. Data Donation  -->
+
+
+<!-- .pull-left[ -->
+
+<!-- $\color{green}{\text{Upsides}}$ -->
+
+
+<!--   + non-public data (e.g., private messages, web browsing history) -->
+
+<!--   + Study (historical) records of users -->
+
+<!--       + over time -->
+
+<!--   + Completeness of data (e.g. when using Google Takeout) -->
+
+
+<!-- ] -->
+
+<!-- .pull-right[ -->
+
+<!-- $\color{red}{\text{Downsides}}$ -->
+
+<!--   + Biased samples  -->
+
+<!--       + who is more likely to give up data? -->
+
+<!--   + Very privacy-sensitive data might need to be collected -->
+
+<!--       + how to ensure privacy? -->
+
+<!--       + reproducibility? -->
+
+<!--   + data is often less structured or documented -->
+
+<!-- ] -->
+
+
+
+<!-- --- -->
+
+
+<!-- ### Online Political Microtargeting of Political Ads - the "bad actors"-story -->
+
+
+<!-- .pull-left[ -->
+<!-- <img src="img/cambridge_analytica.png" width="100%"> -->
+
+
+<!-- ]  -->
+
+
+
+
+
+
+<!-- --- -->
+
+<!-- class: center, middle, white -->
+
+
+<!-- <!-- ![](img/plantuml00.png) --> -->
+<!-- <img src="img/plantuml00.png" width="80%"> -->
+
+
+<!-- --- -->
+
+<!-- class: center, middle, white -->
+
+<!-- <!-- ![](img/plantuml01.png) --> -->
+<!-- <img src="img/plantuml01.png" width="80%"> -->
+
+
+<!-- --- -->
+
+
+<!-- class: center, middle, white -->
+
+<!-- <!-- ![](img/plantuml02.png) --> -->
+
+
+<!-- <img src="img/plantuml02.png" width="80%"> -->
+
+<!-- --- -->
+
+
+<!-- class: center, middle, white -->
+
+<!-- <!-- ![](img/plantuml04.png) --> -->
+
+
+<!-- <img src="img/plantuml04.png" width="80%"> -->
+
+
+<!-- --- -->
+
+<!-- class: center, middle, white -->
+
+<!-- <!-- ![](img/plantuml05.png) --> -->
+<!-- <img src="img/plantuml05.png" width="80%"> -->
+
+
+<!-- --- -->
+
+<!-- ### Who decides who sees which ad on Meta? -->
+
+<!-- + **Ad auctions** = an auction takes place that determines which ad by whom is shown -->
+
+<!-- <center> -->
+<!-- <img src="img/fb-ad-bidding.png" width="65%" height="65%"> -->
+<!-- </center> -->
+
+<!-- --- -->
+
+<!-- ### Who decides who sees which ad on Meta? -->
+
+<!-- + **Relevance** = how relevant is the ad to the user -->
+
+<!-- ```{r, out.width="70%", echo = F} -->
+<!-- knitr::include_graphics("img/relevant_quote.png") -->
+<!-- ``` -->
+
+<!-- [(Meta Business Help Center, 2022)](https://www.facebook.com/business/help/430291176997542) -->
+
+<!-- --- -->
+
+
+<!-- ### Who decides who sees which ad on Meta? -->
+
+<!-- + **Ad auctions** = an auction takes place that determines which ad by whom is shown: based on *budget* -->
+
+<!-- + **Relevance** = how relevant is the ad to the user -->
+
+<!-- <center> -->
+<!-- <img src="img/fb-ad-bidding2.png" width="65%" height="65%"> -->
+<!-- </center> -->
+
+<!-- -- -->
+
+<!-- ##### *Ad delivery algorithms* finding *relevant* audiences for ads: we term this **algorithmic microtargeting** -->
+
+
+
+<!-- --- -->
+
+<!-- ### A (silly) example -->
+
+<!-- .pull-left[ -->
+<!--     <img src="https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1465341854i/12111823.jpg" width = "60%"> -->
+<!-- ] -->
+
+<!-- -- -->
+
+<!-- .pull-right[ -->
+<!--     ![](img/fsnow.png) -->
+<!-- F. Snow, obsessed with A Song of Ice and Fire -->
+<!-- ] -->
+
+
+<!-- --- -->
+
+
+
+
+
+
+
+
+<!-- --- -->
+
+<!-- class: center, middle -->
+
+<!-- ## Summary -->
+
+
+<!-- --- -->
+
+<!-- ### Summary -->
+
+<!-- Our findings do not always align with expectations. -->
+
+<!-- H1: More "relevant" audiences were not always cheaper -->
+
+<!-- H2: More "relevant" audiences were not always reached more -->
+
+<!-- H3: Party with greatest audience did not reach more or get cheaper prices -->
+
+<!-- -- -->
+
+<!-- **However:** -->
+
+<!-- > We **still** find that Meta ad delivery algorithm prioritizes certain parties and audiences for political advertising -->
+
+<!-- 1. PvdA pays least and reach most -->
+<!-- 2. Lower-educated, people interested in environment, women and younger people more expensive to reach -->
+
+<!-- --- -->
+
+<!-- ### Limitations -->
+
+<!-- + Only three political parties -->
+
+<!-- + Study first-of-its-kind -->
+
+<!--   + needs more research! -->
+
+<!-- + Relevance might need to be measured differently? -->
+
+<!-- + We do not vary content.. although studies suggest this is important (Ali et al. 2021, 2022) -->
+
+
+<!-- --- -->
+
+<!-- ### Implications -->
+
+
+<!-- + Unequal playing field -->
+
+<!--   + Meta (dis-)advantages certain parties -->
+
+<!--   +  the findings presented in this paper show that political parties were not charged the same price for the same service -->
+
+<!-- -- -->
+
+<!-- + Potential for deepening political, social and geographical inequalities  -->
+
+<!--   + Some groups of people and regions are **systematically** less likely to receive political advertisements and more expensive to reach -->
+
+<!--   + isolating these groups from receiving election-related information -->
+
+<!-- -- -->
+
+<!-- + Little to no transparency by Meta about these systematic biases -->
+
+<!--   + difficult to research and make visible instances of unequal treatment and price discrimination -->
+<!--   + highlighting importance of access to data -->
+
+<!-- -- -->
+
+<!-- + Simply "banning" microtargeting would be inadequate -->
+
+<!--   + more power to the black box algorithm -->
+
+<!-- --- -->
+
+
+<!-- class: center, middle, white -->
+
+<!-- # Zooming out -->
+
+
+<!-- Hopefully you found the methods, studies, and results in this talk interesting! -->
+
+
+
+<!-- Aaker, J. L. (1999). The Malleable Self: The Role of Self-Expression in Persuasion. Journal of Marketing Research, 36(1), 45–57. https://doi.org/10.1177/002224379903600104 -->
+
+<!-- Ali, M., Sapiezynski, P., Bogen, M., Korolova, A., Mislove, A., & Rieke, A. (2019). Discrimination through Optimization: How Facebook’s Ad Delivery Can Lead to Biased Outcomes. Proceedings of the ACM on Human-Computer Interaction, 3(CSCW), 1–30. https://doi.org/10.1145/3359301 -->
+
+<!-- Ali, M., Sapiezynski, P., Korolova, A., Mislove, A., & Rieke, A. (2021). Ad Delivery Algorithms: The Hidden Arbiters of Political Messaging. Proceedings of the 14th ACM International Conference on Web Search and Data Mining, 13–21. https://doi.org/10.1145/3437963.3441801 -->
+
+<!-- Dobber, T., Trilling, D., Helberger, N., & de Vreese, C. (2019). Spiraling downward: The reciprocal relation between attitude toward political behavioral targeting and privacy concerns. New Media & Society, 21(6), 1212–1231. https://doi.org/10.1177/1461444818813372 -->
+
+<!-- Dobber, T., Metoui, N., Trilling, D., Helberger, N., & de Vreese, C. (2020). Do (Microtargeted) Deepfakes Have Real Effects on Political Attitudes? The International Journal of Press/Politics, 26(1), 69–91. https://doi.org/10.1177/1940161220944364 -->
+
+<!-- Dobber, T., Trilling, D., Helberger, N., & de Vreese, C. (2023). Effects of an issue-based microtargeting campaign: A small-scale field experiment in a multi-party setting. The Information Society, 39(1), 35–44. https://doi.org/10.1080/01972243.2022.2134240 -->
+
+
+<!-- --- -->
+
+<!-- ## Literature -->
+
+<!-- Chan, C. H., Bajjalieh, J., Auvil, L., Wessler, H., Althaus, S., Welbers, K., ... & Jungblut, M. (2021). Four best practices for measuring news sentiment using ‘off-the-shelf’dictionaries: A large-scale p-hacking experiment. Computational Communication Research, 3(1), 1-27. -->
+
+<!-- Coppock, A., Hill, S. J., & Vavreck, L. (2020). The small effects of political advertising are small regardless of context, message, sender, or receiver: Evidence from 59 real-time randomized experiments. Science Advances, 6(36), eabc4046. https://doi.org/10.1126/sciadv.abc4046 -->
+
+
+<!-- Decker, H., & Krämer, N. (2023). Is Personality Key? Persuasive Effects of Prior Attitudes and Personality in Political Microtargeting. Media and Communication, 11(3), 250–261. https://doi.org/10.17645/ -->
+<!-- mac.v11i3.6627 -->
+
+<!-- Endres, K. (2020). Targeted Issue Messages and Voting Behavior. American Politics Research, 48(2), 317–328. https://doi.org/10.1177/1532673X19875694 -->
+
+<!-- Fiske, S. T. (1980). Attention and weight in person perception: The impact of negative and extreme behavior. Journal of Personality and Social Psychology, 38(6), 889–906. https://doi.org/10.1037/0022-3514.38.6.889 -->
+
+
+<!-- Freelon, D. (2018). Computational research in the post-API age. Political Communication, 35(4), 665-668. -->
+
+
+<!-- Garramone, G. M. (1984). Voter Responses to Negative Political Ads. Journalism Quarterly, 61(2), 250–259. https://doi.org/10.1177/107769908406100202 -->
+
+
+
+<!-- ---  -->
+
+<!-- hi -->
+
+<!-- --- -->
+
+<!-- ## Literature -->
+
+<!-- Geer, J. G. (2006). In defense of negativity: Attack ads in presidential campaigns. University of Chicago Press. -->
+
+
+<!-- Haenschen, K. (2022). The Conditional Effects of Microtargeted Facebook Advertisements on Voter Turnout. Political Behavior, 1–21. https://doi.org/10.1007/s11109-022-09781-7 -->
+
+
+<!-- Hannun, A., Case, C., Casper, J., Catanzaro, B., Diamos, G., Elsen, E., Prenger, R., Satheesh, S., Sengupta, S., Coates, A., & Ng, A. Y. (2014). Deep Speech: Scaling up end-to-end speech recognition. arXiv:1412.5567 [cs]. Retrieved January 30, 2021, from http://arxiv.org/abs/1412.5567 -->
+
+<!-- Haselmayer, M. (2019). Negative campaigning and its consequences: A review and a look ahead. French Politics, 17(3), 355–372. https://doi.org/10.1057/s41253-019-00084-8 -->
+
+<!-- Hilbig, B. E. (2009). Sad, thus true: Negativity bias in judgments of truth. Journal of Experimental Social Psychology, 45(4), 983–986. https://doi.org/10.1016/j.jesp.2009.04.012 -->
+
+<!-- Krotzek, L. J. (2019). Inside the Voter’s Mind: The Effect of Psychometric Microtargeting on Feelings Toward and Propensity to Vote for a Candidate. International Journal of Communication; Vol 13 (2019). https://ijoc.org/index.php/ijoc/article/view/9605 -->
+
+
+<!-- Nai, A., & Maier, J. (2020). Is Negative Campaigning a Matter of Taste? Political Attacks, Incivility, and the Moderating Role of Individual Differences. American Politics Research, 49(3), 269–281. https://doi.org/10.1177/1532673X20965548 -->
+
+
+<!-- --- -->
+
+<!-- ## Literature -->
+
+<!-- Moon, Y. (2002). Personalization and Personality: Some Effects of Customizing Message Style Based on Consumer Personality. Journal of Consumer Psychology, 12(4), 313–325. https://doi.org/10.1016/S1057-7408(16)30083-3 -->
+
+
+<!-- Mutz, D. C., & Reeves, B. (2005). The New Videomalaise: Effects of Televised Incivility on Political Trust. American Political Science Review, 99(1), 1–15. https://doi.org/10.1017/S0003055405051452 -->
+
+
+<!-- Ohme, J., Araujo, T., Boeschoten, L., Freelon, D., Ram, N., Reeves, B. B., & Robinson, T. N. (2023). Digital Trace Data Collection for Social Media Effects Research: APIs, Data Donation, and (Screen) Tracking. Communication Methods and Measures, 1-18. -->
+
+<!-- Petty, R. E., and J. T. Cacioppo. 1986. The elaboration likelihood model of persuasion. Advances in Experimental Social Psychology 19:123–205. doi: 10.1016/S0065-2601(08)60214-2.   -->
+
+<!-- Rozin, P., & Royzman, E. B. (2001). Negativity Bias, Negativity Dominance, and Contagion. Personality and Social Psychology Review, 5(4), 296–320. https://doi.org/10.1207/S15327957PSPR0504_2 -->
+
+
+<!-- Sharp, B., Danenberg, N., & Bellman, S. (2018). Psychological targeting. Proceedings of the National Academy of Sciences, 115(34), E7890–E7890. https://doi.org/10.1073/pnas.1810436115 -->
+
+
+<!-- Tanusondjaja, A., Michelon, A., Hartnett, N., & Stocchi, L. (2023). Reaching Voters on Social Media: Planning Political Advertising on Snapchat. International Journal of Market Research, 65(5), 566–580. https://doi.org/10.1177/14707853231175085 -->
+
+
+
+
+<!-- --- -->
+
+<!-- ## Literature -->
+
+
+<!-- Tappin, B. M., Wittenberg, C., Hewitt, L. B., Berinsky, A. J., & Rand, D. G. (2023). Quantifying the potential persuasive returns to political microtargeting. Proceedings of the National Academy of Sciences, 120(25), e2216261120. https://doi.org/10.1073/pnas.2216261120 -->
+
+<!-- Tufekci, Z. (2014). Engineering the public: Big data, surveillance and computational politics. First Monday. https://doi.org/10.5210/fm.v19i7.4901 -->
+
+
+<!-- Van Atteveldt, W., Van der Velden, M. A., & Boukes, M. (2021). The validity of sentiment analysis: Comparing manual annotation, crowd-coding, dictionary approaches, and machine learning algorithms. Communication Methods and Measures, 15(2), 121-140. -->
+
+
+
+<!-- Walter, A. S., & van der Eijk, C. (2019). Unintended consequences of negative campaigning: Backlash and second-preference boost effects in a multi-party context. The British Journal of Politics and International Relations, 21(3), 612–629. https://doi.org/10.1177/1369148119842038 -->
+
+
+<!-- Wheeler, S. C., DeMarree, K. G., & Petty, R. E. (2008). A match made in the laboratory: Persuasion and matches to primed traits and stereotypes. Journal of Experimental Social Psychology, 44(4), 1035–1047. https://doi.org/10.1016/j.jesp.2008.03.007 -->
+
+
+<!-- Zarouali, B., Dobber, T., De Pauw, G., & de Vreese, C. (2022). Using a Personality-Profiling Algorithm to Investigate Political Microtargeting: Assessing the Persuasion Effects of Personality-Tailored Ads on Social Media. Communication Research, 1066–1091. https://doi.org/10.1177/0093650220961965 -->
+
+
+<!-- --- -->
+
+<!-- class: center, middle -->
+
+<!-- ## Appendix -->
+
+
+<!-- --- -->
+
+
+
+<!-- class: center, white, middle -->
+
+<!-- ### Within-party differences -->
+
+<!-- Reach and cost **over time** -->
+
+<!-- -- -->
+
+<!-- Potential *market shock* on February 4th? -->
+
+
+<!-- --- -->
+
+<!-- class: white -->
+
+
+<!-- ### Within-party differences per day - Reach and Cost -->
+
+<!-- .pull-left[ -->
+<!-- ```{r} -->
+<!-- overview_day %>%  -->
+<!--   drop_na(campaign_name) %>%  -->
+<!--   mutate(targeting = fct_relevel(targeting, c("Economy", "Environment", "Politics", "Economy excluded", "Environment excluded", "Politics excluded", "Higher Education", "Lower Education", "No Targeting"))) %>%  -->
+<!--   ggplot(aes(day, reach, color = targeting)) + -->
+<!--   geom_jitter() + -->
+<!--   geom_smooth() + -->
+<!--   facet_wrap(~targeting) + -->
+<!--   theme_minimal() + -->
+<!--   theme(legend.position = "none", -->
+<!--         plot.title = element_text(size = 19, face = "bold"), -->
+<!--         strip.text.y = element_blank(),  -->
+<!--         strip.background = element_rect(fill = "lightgrey"))    + -->
+<!--   ggtitle("Reach over time")  -->
+<!-- ``` -->
+<!-- ] -->
+
+<!-- -- -->
+
+<!-- .pull-right[ -->
+<!-- ```{r} -->
+<!-- overview_day %>%  -->
+<!--   drop_na(campaign_name) %>%  -->
+<!--   mutate(engagement_rate = engagement/impressions*1000) %>%  -->
+<!--   mutate(targeting = fct_relevel(targeting, c("Economy", "Environment", "Politics", "Economy excluded", "Environment excluded", "Politics excluded", "Higher Education", "Lower Education", "No Targeting"))) %>%  -->
+<!--   ggplot(aes(day, cost_per_1_000_people_reached, color = targeting)) + -->
+<!--   geom_jitter() + -->
+<!--   geom_smooth() + -->
+<!--   facet_wrap(~targeting) + -->
+<!--   theme_minimal() + -->
+<!--   theme(legend.position = "none", -->
+<!--         plot.title = element_text(size = 19, face = "bold"), -->
+<!--         strip.text.y = element_blank(),  -->
+<!--         strip.background = element_rect(fill = "lightgrey"))   + -->
+<!--   ggtitle("Cost over time")  -->
+<!-- ``` -->
+<!-- ] -->
+
+
+
+
+<!-- --- -->
+
+<!-- class: center, white, middle -->
+
+<!-- ### Within-party differences -->
+
+<!-- Reach and cost **over time** and **per party** -->
+
+<!-- $\rightarrow$ party differences remain constant despite *"shock"* -->
+
+
+<!-- --- -->
+
+
+<!-- class: white -->
+
+<!-- ## Price differences per day -->
+
+<!-- .pull-left[ -->
+
+<!-- We observe: -->
+
+<!-- *Consistent results* -->
+
+<!-- + "Market shock" **hits all parties equally** -->
+
+<!-- + Environment audience consistently *more expensive* -->
+
+<!-- + Higher educated audience consistently *less expensive* -->
+
+<!-- *Inconsistent results* -->
+
+<!-- + Audiences interested in economy & politics are typically cheaper except on the day of the spike -->
+
+
+
+<!-- ] -->
+
+<!-- .pull-right[ -->
+<!-- ```{r, fig.height=6, fig.width=8} -->
+<!-- over_time_gg <- readRDS("../../phd/codebase/algo_ads/data/over_time_gg.rds") -->
+
+<!-- over_time_gg %>%  -->
+<!--   ggplot(aes(day, Difference, shape = party)) + -->
+<!--     # geom_ribbon(aes(ymin = CI_low, ymax = CI_high), width = 0, position = position_dodge(width = 0.9)) + -->
+<!--     geom_errorbar(aes(ymin = CI_low, ymax = CI_high, color = party_color), width = 0, position = position_dodge(width = 0.9)) + -->
+
+<!--     # geom_line(aes(color = party_color)) + -->
+<!--     geom_point(aes(color = party_color), position = position_dodge(width = 0.9)) + -->
+<!--     # pammtools::geom_stepribbon(aes(ymin = CI_low, ymax = CI_high, fill = party_color), alpha = 0.1) + -->
+<!--     # geom_text(aes(label = diff_label, y = Difference , x = c(0.8, 1.05, 1.4)), position = position_dodge(width = 0.9), show.legend = F) + -->
+<!--     # coord_flip() + -->
+<!--     # geom_text(aes(label = diff_label), nudge_x = 0.1) + -->
+<!--     geom_hline(yintercept = 0, linetype = "dashed") + -->
+<!--     labs(y = "Estimated price differences of reaching 1k users in Euro", -->
+<!--          x = "Estimates per day") + -->
+<!--     theme_minimal() + -->
+<!--     scale_x_continuous(breaks = 1:7, -->
+<!--                  labels = paste0("Day ", 1:7), minor_breaks = NULL) + -->
+<!--     scale_color_manual(values = c("#0066ee", "#e3101c", "#80c31c", "black")) + -->
+<!--     scale_shape_manual(name = "Party", values = c(16, 15, 17), labels = c("PvdA", "GroenLinks", "VVD")) + -->
+
+<!--     # scale_color_parties() + -->
+<!--     # facet_grid(condition_comparison ~ party) + -->
+<!--     # scale_alpha_discrete(range = c(0.25, 1)) + -->
+<!--     facet_wrap(~condition_comparison, ncol = 2) + -->
+<!--     theme(legend.position = "bottom", -->
+<!--           # strip.text.y = element_blank(),  -->
+<!--           strip.background = element_rect(fill = "lightgrey")) + -->
+<!--     guides(color = "none") + -->
+<!--     ggtitle("Price differences per day") -->
+
+<!-- ``` -->
+<!-- ] -->
+
+
+<!-- <!-- --- --> -->
+
+
+<!-- <!-- ## Summary of within-party differences --> -->
+
+<!-- <!-- -- --> -->
+
+<!-- <!-- + Some audiences **systematically more expensive** and **receive less ads** than others --> -->
+
+<!-- <!--   + Lower Education, Environment interests --> -->
+
+<!-- <!--   + No targeting is cheapest, reaches most --> -->
+
+<!-- <!-- + Mostly **consistent for each party** --> -->
+
+<!-- <!-- + Suspected *"market shock"* on February 4th affects results --> -->
+
+<!-- <!--   + Some evidence that politics and economy audiences might be cheaper were it not for the spike --> -->
+
+
+<!-- --- -->
+
+<!-- class: white -->
+
+<!-- ### Price differences per day -->
+
+
+
+<!-- <center> -->
+<!-- <img src="img/days_breakdown_fin.png" width="50%" height="50%"> -->
+<!-- </center> -->
+
+
+
+<!-- --- -->
+
+<!-- class: white -->
+
+<!-- ### Bulk Discount? -->
+
+<!-- ```{r} -->
+<!-- report_data <- readRDS("../../phd/codebase/algo_ads/data/report_data.rds") -->
+<!-- ``` -->
+
+
+<!-- .pull-left[ -->
+<!-- ```{r} -->
+<!-- report_data %>% #count(page_name, sort = T) %>%  -->
+<!--   filter(page_name %in% c("GroenLinks", "VVD", "Partij van de Arbeid (PvdA)")) %>% -->
+<!--   mutate(party = case_when( -->
+<!--     str_detect(page_name, "PvdA")  ~ "PvdA", -->
+<!--     T ~ page_name -->
+<!--   )) %>%  -->
+<!--   filter(day <= as.Date("2022-02-09")) %>% -->
+<!--   # filter(day >= as.Date("2022-01-29")) %>%  -->
+<!--   # filter(disclaimer %in% c("GroenLinks", "Partij van de Arbeid (PvdA)", "VVD")) %>% -->
+<!--   # filter(disclaimer == "PvdA") -->
+<!--   # count(disclaimer, sort = T) -->
+<!--   mutate(spent = readr::parse_number(amount_spent_eur)) %>%  -->
+<!--   # filter(spent != 100) %>%  -->
+<!--   ggplot(aes(day, spent, fill = party)) + -->
+<!--   geom_col(position = position_dodge()) + -->
+<!--   scale_fill_parties() + -->
+<!--   theme_minimal() + -->
+<!--   theme(legend.position = "top") -->
+<!--   # geom_smooth(se = F)# + -->
+<!--   # scale_y_log10()  -->
+<!-- ``` -->
+
+
+<!-- ] -->
+
+<!-- .pull-right[ -->
+<!-- ```{r} -->
+<!-- report_data %>%  -->
+<!--   filter(page_name %in% c("GroenLinks", "VVD", "Partij van de Arbeid (PvdA)")) %>% -->
+<!--   mutate(party = case_when( -->
+<!--     str_detect(page_name, "PvdA")  ~ "PvdA", -->
+<!--     T ~ page_name -->
+<!--   )) %>%  -->
+<!--   filter(day <= as.Date("2022-02-09")) %>% -->
+<!--   # filter(day >= as.Date("2022-01-29")) %>%  -->
+<!--   # filter(disclaimer %in% c("GroenLinks", "Partij van de Arbeid (PvdA)", "VVD")) %>% -->
+<!--   # filter(disclaimer == "PvdA") -->
+<!--   # count(disclaimer, sort = T) -->
+<!--   mutate(spent = readr::parse_number(amount_spent_eur)) %>%  -->
+<!--   # filter(spent != 100) %>%  -->
+<!--   ggplot(aes(day, number_of_ads_in_library, fill = party))  + -->
+<!--   geom_col(position = position_dodge()) + -->
+<!--   scale_fill_parties() + -->
+<!--   theme_minimal() + -->
+<!--   theme(legend.position = "top") -->
+<!-- ``` -->
+
+
+<!-- ] -->
+
+<!-- --- -->
+
+
+<!-- class: white, middle center -->
+
+<!-- ## Skewed delivery  -->
+
+<!-- in terms of gender, age and region -->
+
+<!-- --- -->
+
+
+
+<!-- class: white -->
+
+<!-- ## Differences in delivery by gender -->
+
+<!-- .pull-left[ -->
+<!-- + *Line at zero* shows empirical equilibrium of target audiences (i.e. the observed share of men and women in target audience) -->
+
+<!-- + *Deviation from zero* are algorithmic biases -->
+
+<!--   + above zero: prioritization -->
+
+<!--   + below zero: de-prioritization -->
+
+<!-- + Ads *deliver to more men* for every party -->
+
+<!-- + However: bias towards men seems smaller for GroenLinks -->
+<!-- ] -->
+
+
+<!-- .pull-right[ -->
+<!-- ```{r} -->
+
+<!-- gender_dat <- readRDS("../../phd/codebase/algo_ads/data/gender.rds") %>%  -->
+<!--   filter(gender != "unknown") -->
+
+<!-- gender_audience <- readRDS("../../phd/codebase/algo_ads/data/audience_joined_gender.rds") -->
+
+<!-- gender_audience %>%  -->
+<!--   filter(gender != "unknown") %>% -->
+<!--   # filter(targeting == "No Targeting") %>% -->
+<!--   # drop_na(campaign_name) %>% -->
+<!--   ggplot(aes(gender, diff)) + -->
+<!--   geom_boxplot() + -->
+<!--   facet_wrap(~party) + -->
+<!--   ggpubr::stat_compare_means() + -->
+<!--   EnvStats::stat_mean_sd_text(digits = 0) + -->
+<!--   theme_minimal()  + -->
+<!--   theme(strip.background = element_rect(fill = "lightgrey")) + -->
+<!--   labs(y = "Difference between audience share and delivery share") + -->
+<!--   ggtitle("Difference between audience share and delivery share") + -->
+<!--   geom_hline(yintercept = 0, linetype = "dashed") -->
+<!-- ``` -->
+<!-- ] -->
+
+
+
+
+<!-- --- -->
+
+<!-- class: white -->
+
+<!-- ## Differences in delivery by age group -->
+
+
+<!-- .pull-left[ -->
+
+<!-- + Ads *deliver less to young people* -->
+
+<!--   + aged 18-24 -->
+
+<!-- + Consistent for each party -->
+
+<!-- ] -->
+
+<!-- -- -->
+
+<!-- .pull-right[ -->
+<!-- ```{r} -->
+<!-- age_audience <- readRDS("../../phd/codebase/algo_ads/data/audience_joined_age.rds") -->
+
+
+<!-- age_audience %>% -->
+<!--   filter(age != "13-17") %>%  -->
+<!--   filter(age != "unknown") %>% -->
+<!--   # filter(targeting == "No Targeting") %>% -->
+<!--   # drop_na(campaign_name) %>% -->
+<!--   ggplot(aes(age, diff)) + -->
+<!--   geom_boxplot() + -->
+<!--   facet_wrap(~party) + -->
+<!--   # ggpubr::stat_compare_means() + -->
+<!--   # EnvStats::stat_mean_sd_text(digits = 0) + -->
+<!--   theme_minimal()  + -->
+<!--   theme(strip.background = element_rect(fill = "lightgrey")) + -->
+<!--   labs(y = "Difference between audience share and delivery share") + -->
+<!--   ggtitle("Difference between audience share and delivery share") + -->
+<!--   geom_hline(yintercept = 0, linetype = "dashed") + -->
+<!--   coord_flip() -->
+<!-- ``` -->
+<!-- ] -->
+
+
+<!-- --- -->
+
+<!-- class: white -->
+
+<!-- ## Region differences -->
+
+<!-- -- -->
+
+<!-- .pull-left[ -->
+
+<!-- + Ads deliver more to some regions -->
+
+<!--   + for example: Limburg, Friesland, Drenthe -->
+
+<!-- + Ads deliver less to other regions -->
+
+<!--   + Utrecht, North Holland, North Brabant -->
+
+<!-- + Consistent for each party -->
+
+
+<!-- ] -->
+
+<!-- -- -->
+
+<!-- .pull-right[ -->
+<!-- ```{r} -->
+<!-- region_audience <- readRDS("../../phd/codebase/algo_ads/data/audience_joined_region.rds") -->
+
+
+<!-- region_audience %>% -->
+<!--   filter(age != "13-17") %>%  -->
+<!--   filter(age != "unknown") %>% -->
+<!--   mutate(region = fct_reorder(region, diff)) %>%  -->
+<!--   # filter(targeting == "No Targeting") %>% -->
+<!--   # drop_na(campaign_name) %>% -->
+<!--   ggplot(aes(region, diff)) + -->
+<!--   geom_boxplot() + -->
+<!--   facet_wrap(~party) + -->
+<!--   # ggpubr::stat_compare_means() + -->
+<!--   # EnvStats::stat_mean_sd_text(digits = 0) + -->
+<!--   theme_minimal()  + -->
+<!--   theme(strip.background = element_rect(fill = "lightgrey")) + -->
+<!--   labs(y = "Difference between audience share and delivery share") + -->
+<!--   ggtitle("Difference between audience share and delivery share") + -->
+<!--   geom_hline(yintercept = 0, linetype = "dashed") + -->
+<!--   coord_flip() -->
+<!-- ``` -->
+<!-- ] -->
+
+<!-- --- -->
+
+
+<!-- class: white -->
+<!-- #### Between-party differences -->
+
+<!-- .font80[If we exclude economic interests/target environmental interests: VVD reaches less people and cheaper than GL] -->
+
+
+
+
+
+
+<!-- .pull-left[ -->
+<!-- ```{r} -->
+
+<!-- mod_nobreak_h1cg <- lm(reach ~ targeting * party + engagement, data = overview) -->
+
+<!-- library(modelbased) -->
+
+<!-- contrasts_nobreak_h1cg <- estimate_contrasts(mod_nobreak_h1cg, contrast = c("targeting", "party"), -->
+<!--                                 at = c("targeting", "party")) %>%  -->
+<!--   as.data.frame()  %>%   -->
+<!--   mutate(Contrast = paste(Level1, "-", Level2)) %>%   -->
+<!--   mutate(condition_comparison = fct_reorder(Contrast, Difference))  -->
+
+
+
+
+<!-- ww <- contrasts_nobreak_h1cg %>%  -->
+<!--   filter(str_detect(condition_comparison, "excluded")) %>%  -->
+<!--   filter(str_count(condition_comparison, "Economy excluded") == 2)  %>%  -->
+<!--   mutate(party = str_extract(Level1, "VVD|GroenLinks|PvdA")) %>%  -->
+<!--   filter(str_detect(Level2, "GroenLinks")) %>%  -->
+<!--   bind_rows(contrasts_nobreak_h1cg %>% -->
+<!--   filter(!str_detect(condition_comparison, "excluded")) %>% -->
+<!--   filter(str_count(condition_comparison, "Environment") == 2)  %>% -->
+<!--   mutate(party = str_extract(Level1, "VVD|GroenLinks|PvdA")) %>% -->
+<!--   filter(str_detect(Level2, "GroenLinks"))) %>% -->
+<!--   # bind_rows(contrasts_nobreak_h1cg %>%  -->
+<!--   # filter(!str_detect(condition_comparison, "excluded")) %>% -->
+<!--   # filter(str_count(condition_comparison, "Economy") == 2)  %>%  -->
+<!--   # mutate(party = str_extract(Level1, "VVD|GroenLinks|PvdA")) %>%  -->
+<!--   # filter(str_detect(Level2, "GroenLinks"))) %>%  -->
+<!--   # bind_rows(contrasts_nobreak_h1cg %>%  -->
+<!--   # filter(!str_detect(condition_comparison, "excluded")) %>% -->
+<!--   # filter(str_count(condition_comparison, "Politics") == 2)  %>%  -->
+<!--   # mutate(party = str_extract(Level1, "VVD|GroenLinks|PvdA")) %>%  -->
+<!--   # filter(str_detect(Level2, "GroenLinks"))) %>%  -->
+<!--   # in case the comparison is in wrong direction, change around -->
+<!--   # mutate_at(vars(Difference, CI_low, CI_high), ~ifelse(str_detect(condition_comparison, "excluded"), .x*-1, .x)) %>% -->
+<!--   # mutate_at(vars(Difference, CI_low, CI_high), ~ifelse(str_count(condition_comparison, "VVD")==2, .x*-1, .x)) %>% -->
+<!--   # mutate_at(vars(Difference, CI_low, CI_high), ~ifelse(str_detect(Level1, "Low"), .x*-1, .x)) %>% -->
+<!--   mutate(condition_comparison = str_remove_all(condition_comparison, "VVD|GroenLinks|PvdA")) %>%  -->
+<!--   mutate(plabel = get_plabs(p)) %>%  -->
+<!--   mutate(diff_label = paste0(round(Difference, 2), plabel))  -->
+<!--   # count(condition_comparison) -->
+<!--   # mutate(condition_comparison = "Reach of audience interested in the Environment (compared to VVD and Environment excluded)") %>%  -->
+<!--   # mutate(condition_comparison = ifelse( -->
+<!--     # !str_detect(condition_comparison, "excluded"), -->
+<!--     # "Reach of audience interested in the Environment (compared to GroenLinks)", -->
+<!--     # "Reach of audience interested in the Environment (compared to Environment excluded)" -->
+<!--     # ))  -->
+<!-- # -> ww -->
+
+<!-- ww %>%  -->
+<!--     ggplot(aes("", Difference, color = party)) +  -->
+<!--     geom_point(position = position_dodge(width = 0.9)) + -->
+<!--     geom_errorbar(aes(ymin = CI_low, ymax = CI_high), width = 0, position = position_dodge(width = 0.9)) + -->
+<!--     geom_text(aes(label = diff_label, x= 0 %>% magrittr::add(1.15), y = Difference), position = position_dodge(width = 0.9), show.legend = F) + -->
+<!--     coord_flip() + -->
+<!--     geom_hline(yintercept = 0, linetype = "dashed") + -->
+<!--   labs(y = "Estimated reach differences", -->
+<!--          x = "Targeting Comparisons") + -->
+<!--     theme_minimal() + -->
+<!--     scale_color_parties() + -->
+<!--     ggtitle("Reach (compared to GroenLinks)") + -->
+<!--     # facet_grid(condition_comparison ~ ., scales= "free_y" ) + -->
+<!--     facet_wrap(~condition_comparison, ncol = 2, scales= "free_y" ) + -->
+<!--     theme(legend.position = "bottom", -->
+<!--           strip.text.y = element_blank(),  -->
+<!--           strip.background = element_rect(fill = "lightgrey"))  -->
+
+
+<!-- ``` -->
+<!-- ] -->
+
+
+<!-- .pull-right[ -->
+
+<!-- ```{r} -->
+<!-- mod_nobreak_h1cg <- lm(cost_per_result ~ targeting * party + engagement, data = overview) -->
+
+<!-- ``` -->
+
+<!-- ```{r} -->
+<!-- library(modelbased) -->
+
+<!-- contrasts_nobreak_h1cg <- estimate_contrasts(mod_nobreak_h1cg, contrast = c("targeting", "party"), -->
+<!--                                 at = c("targeting", "party")) %>%  -->
+<!--   as.data.frame()  %>%   -->
+<!--   mutate(Contrast = paste(Level1, "-", Level2)) %>%   -->
+<!--   mutate(condition_comparison = fct_reorder(Contrast, Difference))  -->
+
+
+
+
+<!-- ww <- contrasts_nobreak_h1cg %>%  -->
+<!--   filter(str_detect(condition_comparison, "excluded")) %>%  -->
+<!--   filter(str_count(condition_comparison, "Economy excluded") == 2)  %>%  -->
+<!--   mutate(party = str_extract(Level1, "VVD|GroenLinks|PvdA")) %>%  -->
+<!--   filter(str_detect(Level2, "GroenLinks")) %>%  -->
+<!--   bind_rows(contrasts_nobreak_h1cg %>% -->
+<!--   filter(!str_detect(condition_comparison, "excluded")) %>% -->
+<!--   filter(str_count(condition_comparison, "Environment") == 2)  %>% -->
+<!--   mutate(party = str_extract(Level1, "VVD|GroenLinks|PvdA")) %>% -->
+<!--   filter(str_detect(Level2, "GroenLinks"))) %>% -->
+<!--   # in case the comparison is in wrong direction, change around -->
+<!--   # mutate_at(vars(Difference, CI_low, CI_high), ~ifelse(str_detect(condition_comparison, "excluded"), .x*-1, .x)) %>% -->
+<!--   # mutate_at(vars(Difference, CI_low, CI_high), ~ifelse(str_count(condition_comparison, "VVD")==2, .x*-1, .x)) %>% -->
+<!--   # mutate_at(vars(Difference, CI_low, CI_high), ~ifelse(str_detect(Level1, "Low"), .x*-1, .x)) %>% -->
+<!--   mutate(condition_comparison = str_remove_all(condition_comparison, "VVD|GroenLinks|PvdA")) %>%  -->
+<!--   mutate(plabel = get_plabs(p)) %>%  -->
+<!--   mutate(diff_label = paste0(round(Difference, 2), plabel))  -->
+<!--   # count(condition_comparison) -->
+<!--   # mutate(condition_comparison = "Reach of audience interested in the Environment (compared to VVD and Environment excluded)") %>%  -->
+<!--   # mutate(condition_comparison = ifelse( -->
+<!--     # !str_detect(condition_comparison, "excluded"), -->
+<!--     # "Reach of audience interested in the Environment (compared to GroenLinks)", -->
+<!--     # "Reach of audience interested in the Environment (compared to Environment excluded)" -->
+<!--     # ))  -->
+<!-- # -> ww -->
+
+<!-- ww %>%  -->
+<!--     ggplot(aes("", Difference, color = party)) +  -->
+<!--     geom_point(position = position_dodge(width = 0.9)) + -->
+<!--     geom_errorbar(aes(ymin = CI_low, ymax = CI_high), width = 0, position = position_dodge(width = 0.9)) + -->
+<!--     geom_text(aes(label = diff_label, x= 0 %>% magrittr::add(1.15), y = Difference), position = position_dodge(width = 0.9), show.legend = F) + -->
+<!--     coord_flip() + -->
+<!--     geom_hline(yintercept = 0, linetype = "dashed") + -->
+<!--   labs(y = "Estimated cost differences", -->
+<!--          x = "Targeting Comparisons") + -->
+<!--     theme_minimal() + -->
+<!--     scale_color_parties() + -->
+<!--     ggtitle("Cost (compared to GroenLinks)") + -->
+<!--     # facet_grid(condition_comparison ~ ., scales= "free_y" ) + -->
+<!--     facet_wrap(~condition_comparison, ncol = 2, scales= "free_y" ) + -->
+<!--     theme(legend.position = "bottom", -->
+<!--           strip.text.y = element_blank(),  -->
+<!--           strip.background = element_rect(fill = "lightgrey"))  -->
+
+<!-- ``` -->
+
+
+<!-- ] -->
+
