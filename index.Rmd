@@ -45,10 +45,7 @@ overview_day <- readRDS("../../phd/codebase/algo_ads/data/overview_day.rds")
 
 ```
 
-
-
 ---
-
 
 class: white
 
@@ -84,106 +81,6 @@ class: white
 
   + discrimination, distortion, exploitation, or misjudgement. 
   + A behavior is problematic when it *causes harm* (or potential harm)
-
----
-
-class: white
-
-## Four .fancy[Types] of Problematic Behavior .font50[(Bandy 2021)]
-
-.pull-left[
-
-**1. Discrimination**
-
-disparate treatment based on race, age, gender, location, socio-economic status, or intersecting identities 
-  
-> Example: showing high-paying job ads primarily to men; facial recognition systems performing poorly on minority groups
-  
-]
-
-
-
----
-
-class: white
-
-## Four .fancy[Types] of Problematic Behavior
-
-.pull-left[
-
-**1. Discrimination**
-
-disparate treatment based on race, age, gender, location, socio-economic status, or intersecting identities 
-  
-> Example: showing high-paying job ads primarily to men; facial recognition systems performing poorly on minority groups
-  
-**2. Distortion**
-
-Outcomes distort or obscure reality
-
-> Example: Search engines reinforcing stereotypes; filter bubbles
-
-]
-
---
-
-.pull-right[
-
-**3. Exploitation**
-
-Inappropriate use of (sensitive) personal information
-  
-> Example: Inferring sensitive personal information without consent	
-  
-
-]
-
-
----
-
-class: white
-
-## Four .fancy[Types] of Problematic Behavior
-
-.pull-left[
-
-**1. Discrimination**
-
-disparate treatment based on race, age, gender, location, socio-economic status, or intersecting identities 
-  
-> Example: showing high-paying job ads primarily to men; facial recognition systems performing poorly on minority groups
-  
-**2. Distortion**
-
-Outcomes distort or obscure reality
-
-> Example: Search engines reinforcing stereotypes; filter bubbles
-
-]
-
-
-.pull-right[
-
-**3. Exploitation**
-
-Inappropriate use of (sensitive) personal information
-  
-> Example: Inferring sensitive personal information without consent	
-  
-  
-**4. Misjudgment**
-
-The algorithm makes incorrect predictions or classifications.
-
-
-> Example: Algorithms incorrectly categorizing users' employment status or interests; content moderation errors 
-
-]
-
-
-
-
-
 
 ---
 
@@ -351,6 +248,42 @@ class: white, middle, center
 
 ---
 
+### Who decides who sees which ad on Meta?
+
++ **Ad auctions** = an auction takes place that determines which ad by whom is shown
+
+<center>
+<img src="img/fb-ad-bidding.png" width="65%" height="65%">
+</center>
+
+---
+
+### Who decides who sees which ad on Meta?
+
++ **Relevance** = how relevant is the ad to the user
+
+```{r, out.width="70%", echo = F}
+knitr::include_graphics("img/relevant_quote.png")
+```
+
+[(Meta Business Help Center, 2022)](https://www.facebook.com/business/help/430291176997542)
+
+---
+
+
+### Who decides who sees which ad on Meta?
+
++ **Ad auctions** = an auction takes place that determines which ad by whom is shown: based on *budget*
+
++ **Relevance** = how relevant is the ad to the user
+
+<center>
+<img src="img/fb-ad-bidding2.png" width="65%" height="65%">
+</center>
+
+---
+
+
 ### Pricing differences in the US 2020 election
 
 + Biden campaign paid more than **6x more**
@@ -484,6 +417,23 @@ class: center, middle
 
 ---
 
+### Hypotheses
+
+![](img/relevant_quote.png)
+
+[(Meta Business Help Center, 2022)](https://www.facebook.com/business/help/430291176997542)
+
+
+> **H1:** **The more relevant** an audience is for an ad, **the cheaper is the cost** for reaching 1000 users in that audience.
+
+--
+
+We expect that ads by party with a greater share of supporters are less expensive (H2)
+
+> **H2:** Parties with a greater share of supporters pay less for reaching 1000 users.
+
+---
+
 class: center, middle
 
 # Ad Creative and Setup
@@ -531,7 +481,7 @@ class: white
 
 #### Between-party differences (per individual ad)
 
-.font80[PvdA pays the least (**10-12 cents less** or: 8-10%) & reaches more people (~**1.1 - 1.3k more** per ad)]
+.font80[PvdA pays the least (**10-12 cents less** or: 9-11%) & reaches more people (~**1.1 - 1.3k more** per ad)]
 
 
 .pull-left[
@@ -680,6 +630,13 @@ class: white, middle center
 
 ![](img/priceshare.png)
 
+---
+
+# Algorithms are a black box
+
++ It takes considerable effort to study them
+
++ they behave in ways that can be quite unexpected
 
 ---
 
@@ -687,6 +644,11 @@ class: white, middle center
 
 I am currently in the process of building on this research by conducting a very similar design during the European Parliament elections
 
++ 10 countries + European Level
+
++ 16 parties confirmed
+
++ 18 parties still considering offer
 
 
 
@@ -731,6 +693,108 @@ Link to presentation: *favstats.github.io/algosoc-spring24*
 Weber, M. S., & Kosterich, A. (2018). Coding the News: The role of computer code in filtering and distributing news. Digital Journalism, 6(3), 310–329. https://doi.org/10.1080/21670811.2017.1366865
 
 ---
+
+## Appendix
+
+
+---
+
+class: white
+
+## Four .fancy[Types] of Problematic Behavior .font50[(Bandy 2021)]
+
+.pull-left[
+
+**1. Discrimination**
+
+disparate treatment based on race, age, gender, location, socio-economic status, or intersecting identities 
+  
+> Example: showing high-paying job ads primarily to men; facial recognition systems performing poorly on minority groups
+  
+]
+
+
+
+---
+
+class: white
+
+## Four .fancy[Types] of Problematic Behavior
+
+.pull-left[
+
+**1. Discrimination**
+
+disparate treatment based on race, age, gender, location, socio-economic status, or intersecting identities 
+  
+> Example: showing high-paying job ads primarily to men; facial recognition systems performing poorly on minority groups
+  
+**2. Distortion**
+
+Outcomes distort or obscure reality
+
+> Example: Search engines reinforcing stereotypes; filter bubbles
+
+]
+
+--
+
+.pull-right[
+
+**3. Exploitation**
+
+Inappropriate use of (sensitive) personal information
+  
+> Example: Inferring sensitive personal information without consent	
+  
+
+]
+
+
+---
+
+class: white
+
+## Four .fancy[Types] of Problematic Behavior
+
+.pull-left[
+
+**1. Discrimination**
+
+disparate treatment based on race, age, gender, location, socio-economic status, or intersecting identities 
+  
+> Example: showing high-paying job ads primarily to men; facial recognition systems performing poorly on minority groups
+  
+**2. Distortion**
+
+Outcomes distort or obscure reality
+
+> Example: Search engines reinforcing stereotypes; filter bubbles
+
+]
+
+
+.pull-right[
+
+**3. Exploitation**
+
+Inappropriate use of (sensitive) personal information
+  
+> Example: Inferring sensitive personal information without consent	
+  
+  
+**4. Misjudgment**
+
+The algorithm makes incorrect predictions or classifications.
+
+
+> Example: Algorithms incorrectly categorizing users' employment status or interests; content moderation errors 
+
+]
+
+
+
+
 
 
 
