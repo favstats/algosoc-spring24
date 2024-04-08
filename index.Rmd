@@ -281,23 +281,6 @@ knitr::include_graphics("img/relevant_quote.png")
 <img src="img/fb-ad-bidding2.png" width="65%" height="65%">
 </center>
 
----
-
-
-### Pricing differences in the US 2020 election
-
-+ Biden campaign paid more than **6x more**
-  + compared to Trump campaign when targeting older voters. [(The Markup 2020)](https://themarkup.org/election-2020/2020/10/29/facebook-political-ad-targeting-algorithm-prices-trump-biden)
-
-
-<center>
-```{r, out.width="60%", echo = F}
-knitr::include_graphics("img/older.png")
-```
-</center>
-
-<!-- ![](img/older.png) -->
-
 
 ---
 
@@ -637,6 +620,8 @@ class: white, middle center
 + It takes considerable effort to study them
 
 + they behave in ways that can be quite unexpected
+
++ yet with *algorithm audit study* we can start understanding their outcomes
 
 ---
 
