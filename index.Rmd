@@ -282,6 +282,23 @@ knitr::include_graphics("img/relevant_quote.png")
 </center>
 
 
+
+---
+
+### A (silly) example
+
+.pull-left[
+    <img src="https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1465341854i/12111823.jpg" width = "60%">
+]
+
+--
+
+.pull-right[
+    ![](img/fsnow.png)
+F. Snow, obsessed with A Song of Ice and Fire book series
+]
+
+
 ---
 
 class: white
@@ -937,23 +954,6 @@ The algorithm makes incorrect predictions or classifications.
 
 
 
-<!-- --- -->
-
-<!-- ### A (silly) example -->
-
-<!-- .pull-left[ -->
-<!--     <img src="https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1465341854i/12111823.jpg" width = "60%"> -->
-<!-- ] -->
-
-<!-- -- -->
-
-<!-- .pull-right[ -->
-<!--     ![](img/fsnow.png) -->
-<!-- F. Snow, obsessed with A Song of Ice and Fire -->
-<!-- ] -->
-
-
-<!-- --- -->
 
 
 
